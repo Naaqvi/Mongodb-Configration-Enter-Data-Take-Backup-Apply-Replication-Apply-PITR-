@@ -1,1 +1,67 @@
 ############################# POINT IN TIME RECOVERY ###########################
+mongosh --port 27011
+rs.initiate();
+
+## create databse and make some enteries then exit and run this given command in root for backup
+mongodump --port 27017
+
+## Drop Databse with in the rs.initiate terminal primary  using this given comand 
+db.dropDatabase()
+
+##insert some data
+ db.mycollection.insertMany([
+...   {
+...     name: "Bob Smith",
+...     age: 35,
+...     email: "bob@example.com"
+...   },
+...   {
+...     name: "Charlie Brown",
+...     age: 40,
+...     email: "charlie@example.com"
+...   }
+... ])
+
+## Check enteries
+b.mycollection.find()
+exit
+
+## using given coomand in the root 
+mongodump --port 27017 -d local -c oplog.rs --out oplog_bkp
+
+## enter the mongosh initateroot and use following coomands
+use local \\switched to db local
+db.oplog.rs.find().sort({$natural:-1}).limit(1) /// use this command for timestamp
+exit 
+## run given command in the rooot 
+mongodump --port 27017 -d local -c oplog.rs --out /home/oplog_bkp
+## again enter the mongosh initiate terminal and insert somo data entries in the database 
+
+## run this command in the root 
+--port 27017 -d local -c oplog.rs --out oplog_bkp 
+
+## after that  enter again in the mongosh intiate terminal and drop database
+## and agian checek timestamp after drop database
+
+## use this command to backup database in the root
+mongodump -d local -c oplog.rs --query '{"ts": {"$gte": {"$timestamp": {"t": 1693564359, "i": 1}}}}' --out oplog_bkp
+
+## Restore database
+mongorestore --port 27017
+
+## folow these steps and rename files in the root 
+cd oplog_bkp/local/
+mv oplog.rs.bson oplog.bson
+mv oplog.rs.metadata.json oplog.json
+## after that run this command to restore database 
+mongorestore --oplogReplay --oplogLimit 1693565189:1 ./
+
+## applied 4 oplog entries
+## restored successfully
+
+
+## For more detailes folow this website 
+## https://dbtut.com/index.php/2018/08/18/point-in-time-recovery-on-mongodb-standalone-server/
+
+
+
