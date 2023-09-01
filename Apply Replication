@@ -111,3 +111,6 @@ rs.isMaster()
 rs.add("localhost:27012") //to add second node running on port 27012
 rs.add("localhost:27013") //to add third node running on port 27013
 ## Now try running rs.isMaster() again. You will see the results.
+## for more details
+https://medium.com/swlh/mongodb-creating-a-3-node-replica-set-cluster-7ca94849b139
+https://www.mongodb.com/docs/manual/tutorial/deploy-replica-set/
