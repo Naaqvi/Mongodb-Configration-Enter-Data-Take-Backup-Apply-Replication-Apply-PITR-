@@ -1,0 +1,46 @@
+# Mongodb-Configration-Enter-Data-Take-Backup-Apply-Replication-Apply-PITR-
+This repository is a comprehensive guide and collection of resources for managing MongoDB databases with a focus on configuration, data management, backup strategies, replication setup, and Point-In-Time Recovery (PITR) implementation. 
+## Configration 
+##Import the public key used by the package management system
+##From a terminal, install gnupg and curl if they are not already available:
+
+sudo apt-get install gnupg curl
+run the following command:
+
+curl -fsSL https://pgp.mongodb.com/server-7.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+   --dearmor
+   echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+   sudo apt-get update
+   sudo apt-get install -y mongodb-org
+   sudo systemctl start mongod
+
+## Check status 
+sudo systemctl status mongod
+
+### Create Databse
+##Start by opening the MongoDB shell if it's not already open:
+
+mongosh
+
+##If you're not already in the database where you want to insert data, use the use command to switch to that database. For example:
+
+use mydb
+
+##Insert Multiple Documents with insertMany():
+
+db.mycollection.insertMany([
+  {
+    name: "Bob Smith",
+    age: 35,
+    email: "bob@example.com"
+  },
+  {
+    name: "Charlie Brown",
+    age: 40,
+    email: "charlie@example.com"
+  }
+])
+## You can verify that the documents have been inserted by querying the collection:
+
+ db.mycollection.find()
