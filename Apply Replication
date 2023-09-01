@@ -1,0 +1,113 @@
+############################ APPLY REPLICATION ############################
+
+##To create the keyfile and set appropriate permissions on it, issue the following commands. Here we are using OpenSSL for creating the keyfile.
+
+sudo mkdir -p /usr/local/var/mongodb/pki/
+openssl rand -base64 741 > /usr/local/var/mongodb/pki/replicaset-keyfile
+chmod 400 /usr/local/var/mongodb/pki/replicaset-keyfile
+
+ ## In this step, we will create Mongod config files to start Mongod processes.
+apt install nano 
+nano node1.conf 
+## Paste these rules in node1.conf file and save using control o and enter and press control x for exit.
+storage:
+  dbPath: /usr/local/var/mongodb/node1
+net:
+  bindIp: localhost
+  port: 27011
+security:
+  authorization: enabled
+  keyFile: /usr/local/var/mongodb/pki/replicaset-keyfile
+systemLog:
+  destination: file
+  path: /usr/local/var/log/mongodb/node1/mongod.log
+  logAppend: true
+processManagement:
+  fork: true
+replication:
+  replSetName: replicaset-example
+## Create the required directories for db path and log path.
+
+mkdir -p /usr/local/var/mongodb/node1
+mkdir -p /usr/local/var/log/mongodb/node1
+## next step
+node2.conf
+## Paste these rules in node1.conf file and save using control o and enter and press control x for exit.
+storage:
+  dbPath: /usr/local/var/mongodb/node2
+net:
+  bindIp: localhost
+  port: 27012
+security:
+  authorization: enabled
+  keyFile: /usr/local/var/mongodb/pki/replicaset-keyfile
+systemLog:
+  destination: file
+  path: /usr/local/var/log/mongodb/node2/mongod.log
+  logAppend: true
+processManagement:
+  fork: true
+replication:
+  replSetName: replicaset-example
+Again create the required directories for dbpath and logpath using the following command.
+
+mkdir -p /usr/local/var/mongodb/node2
+mkdir -p /usr/local/var/log/mongodb/node2
+
+## Finally, below is the Mongod config file for the third Mongod process (to simulate the third node). Save it as node3.conf in the same place as node1.conf and node2.conf
+
+storage:   
+  dbPath: /usr/local/var/mongodb/node3
+net:   
+  bindIp: localhost  
+  port: 27013
+security:   
+  authorization: enabled   
+  keyFile: /usr/local/var/mongodb/pki/replicaset-keyfile
+systemLog:   
+  destination: file   
+  path: /usr/local/var/log/mongodb/node3/mongod.log  
+  logAppend: true
+processManagement:   
+  fork: true
+replication:   
+  replSetName: replicaset-example
+## And for the last time, we need to create dbpath and logpath directories for this third node as well. This is because we want each Mongod instance to run in isolation.
+
+mkdir -p /usr/local/var/mongodb/node3
+mkdir -p /usr/local/var/log/mongodb/node3
+ ## Now, once all the config files are ready and the directories for dbpath and logpath are created, we are all set to launch our Mongod processes. 
+## Navigate to the directory where you saved the above three config files and execute the following commands.
+
+mongod -f node1.conf
+mongod -f node2.conf
+mongod -f node3.conf
+## If you want, you can verify that the Mongod processes are indeed running. Feel free to check this in any way that you want. One way to do this is by using the following command.
+
+ps aux | grep -v grep | grep mongod
+## The above command will list all the Mongod instances that are running. You should see three instances.
+
+## Connecting to and adding nodes in our Replica Set.
+
+## Connect to any of the nodes using the mongo shell. We’ll connect to first node.
+mongo --port 27011
+## Once logged in to the mongo shell, execute the following commands in the shell.
+rs.initiate(); // to initiate the replica set
+use admin;     //switch to admin database for creating root user
+db.createUser({
+ user: "test-user",
+ pwd: "test-pass", 
+ roles: [{ role: "root", db: "admin"}]
+});
+## Now disconnect from the shell using CTRL+C or exit command and login to the replica set using the above credentials for the new root user. 
+## We had to create the above root user because it’s necessary to authenticate, to carry out replica set related operations.
+mongo --host "replicaset-example/localhost:27011" -u "test-user" -p "test-pass" --authenticationDatabase "admin"
+## Once logged in, try giving the following command:
+rs.isMaster()
+## If you look at the output of the above command, you see that in the “hosts” field it only lists a single host. This indicates that currently, we have only one node in the replica set.
+
+## To add other nodes (Mongod processes) do the following:
+
+rs.add("localhost:27012") //to add second node running on port 27012
+rs.add("localhost:27013") //to add third node running on port 27013
+## Now try running rs.isMaster() again. You will see the results.
