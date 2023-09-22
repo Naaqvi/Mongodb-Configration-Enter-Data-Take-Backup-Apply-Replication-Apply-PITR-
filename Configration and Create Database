@@ -44,3 +44,10 @@ db.mycollection.insertMany([
 ## You can verify that the documents have been inserted by querying the collection:
 
  db.mycollection.find()
+
+
+## installation for ubuntu 22.04 follow this article
+https://www.fosstechnix.com/how-to-install-mongodb-on-ubuntu-22-04-lts/
+
+## Installation for ubuntu 20.04 follow this article
+https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-20-04
